@@ -16,9 +16,9 @@ provider "aws" {
 resource "aws_instance" "app_server" {
   ami           = "ami-0d866da98d63e2b42"
   instance_type = "t2.micro"
-  key_name	= "srv-dev-pem"
+  key_name	= "pem-dev"
 
   tags = {
-    Name = "Teste AWS Ansible"
+    Name = "VM AWS"
   }
 }

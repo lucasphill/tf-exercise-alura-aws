@@ -1,8 +1,72 @@
 - hosts: terraform-ansible
+  become: true
   tasks:
-    - name: criando arquivo
-      copy:
-        dest: /home/ubuntu/index.html
-        content: <h1>Feito com Terraform e Ansible</h1>
-    - name: criando servidor
-      shell: "nohup busybox httpd -f -p 8080 &"
+    - name: Instalando Python3 e Venv
+      apt:
+        pkg:
+        - python3
+        - virtualenv
+        update_cache: yes
+      become: yes
+    - name: Instalando depdendencias
+      pip: 
+        virtualenv: /home/ubuntu/app/venv
+        name: 
+          - django
+          - djangorestframework
+    - name: Iniciando projeto
+      shell: ". /home/ubuntu/app/venv/bin/activate; django-admin startproject setup /home/ubuntu/app/"
+    - name: Aletrando hosts do settings.py
+      ansible.builtin.lineinfile:
+        path: /home/ubuntu/app/setup/settings.py
+        regexp: 'ALLOWED_HOSTS'
+        line: 'ALLOWED_HOSTS = ["*"]'
+        backrefs: yes
+
+    # - name: Instalar pacotes necessários
+    #   apt:
+    #     name:
+    #       - apt-transport-https
+    #       - ca-certificates
+    #       - curl
+    #       - gnupg
+    #       - lsb-release
+    #     state: present
+
+    # - name: Adicionar chave GPG oficial do Docker
+    #   apt_key:
+    #     url: https://download.docker.com/linux/ubuntu/gpg
+    #     state: present
+
+    # - name: Adicionar repositório do Docker
+    #   apt_repository:
+    #     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    #     state: present
+    #     filename: docker
+
+    # - name: Atualizar o cache do apt novamente
+    #   apt:
+    #     update_cache: yes
+
+    # - name: Instalar Docker Engine
+    #   apt:
+    #     name:
+    #       - docker-ce
+    #       - docker-ce-cli
+    #       - containerd.io
+    #     state: latest
+
+    # - name: Adicionar usuário atual ao grupo docker
+    #   user:
+    #     name: "{{ ansible_user }}"
+    #     groups: docker
+    #     append: yes
+
+    # - name: Ativar e iniciar o serviço Docker
+    #   systemd:
+    #     name: docker
+    #     enabled: yes
+    #     state: started
+
+    # - name: Criando n8n via docker
+    #   shell: "docker volume create n8n_data; docker run -d --rm --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n"
